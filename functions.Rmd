@@ -21,7 +21,7 @@ Standardizing a variable means subtracting the mean, and then dividing by the st
 ```{R}
 
 suppressMessages(library(foreign))
-wcgs <- read.dta("https://drive.google.com/uc?export=download&id=0B8CsRLdwqzbzYWxfN3ExQllBQkU")
+wcgs <- read.dta("/Users/lishaw/Desktop/functions-pre-class-wls009/wcgs2.dta")
 ```
 
 The data has the following variables:
@@ -100,6 +100,25 @@ B. Assign all the numeric columns of the original WCGS dataset to a new dataset 
 C. Using a loop and your new function, standardize all the variables WCGS.new dataset.
 D. What should the mean and standard deviation of all your new standardized variables be? Test your prediction by running a loop
 
+```{r}
+standardize.me <- function(x){
+  x<-(x-mean(x,na.rm = T))/sd(x,na.rm = T)
+  return(x)
+}
+
+library(dplyr)
+WCGS.new <- select_if(wcgs, is.numeric)
+
+for (i in 1:ncol(WCGS.new)){
+  WCGS.new[,i]<- standardize.me(WCGS.new[,i])
+}
+
+# mean=0,sd=1
+for(i in 1:ncol(WCGS.new)){
+  print(c(round(mean(WCGS.new[,i],na.rm = T),2), round(sd(WCGS.new[,i],na.rm = T),2)))
+}
+
+```
 
 
 
@@ -107,4 +126,26 @@ D. What should the mean and standard deviation of all your new standardized vari
 
 A. Using a loop, calculate the mean weight of the subjects separated by the type of CHD they have.
 B. Now do the same thing, but now don’t use a loop
+```{r}
+a=c()
+b=c()
+c=c()
+d=c()
+for (x in 1:nrow(wcgs)){
+  if(wcgs$typchd69[x]=="no CHD"){
+    a<-c(a,wcgs$weight[x])
+  }else if(wcgs$typchd69[x]=="MI or SD"){
+    b<-c(b,wcgs$weight[x])
+  }else if(wcgs$typchd69[x]=="silent MI"){
+    c<-c(c,wcgs$weight[x])
+  }else{
+    d<-c(d,wcgs$weight[x])
+  }
+}
+data.frame("typchd"= c("no CHD","MI or SD","silent MI","angina"), "mean_weight"=c(mean(a),mean(b),mean(c),mean(d)))
+
+wcgs %>%
+  group_by(typchd69) %>%
+  summarise(mean(weight))
+```
 
