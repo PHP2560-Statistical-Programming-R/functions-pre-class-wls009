@@ -109,13 +109,13 @@ standardize.me <- function(x){
 library(dplyr)
 WCGS.new <- select_if(wcgs, is.numeric)
 
-for (i in 1:ncol(WCGS.new)){
-  WCGS.new[,i]<- standardize.me(WCGS.new[,i])
+for (i in seq_along(WCGS.new)){
+  WCGS.new[[i]]<- standardize.me(WCGS.new[[i]])
 }
 
 # mean=0,sd=1
-for(i in 1:ncol(WCGS.new)){
-  print(c(round(mean(WCGS.new[,i],na.rm = T),2), round(sd(WCGS.new[,i],na.rm = T),2)))
+for(i in seq_along(WCGS.new)){
+  print(c(round(mean(WCGS.new[[i]],na.rm = T),2), round(sd(WCGS.new[[i]],na.rm = T),2)))
 }
 
 ```
@@ -127,6 +127,7 @@ for(i in 1:ncol(WCGS.new)){
 A. Using a loop, calculate the mean weight of the subjects separated by the type of CHD they have.
 B. Now do the same thing, but now don’t use a loop
 ```{r}
+library(purrr)
 a=c()
 b=c()
 c=c()
@@ -142,7 +143,8 @@ for (x in 1:nrow(wcgs)){
     d<-c(d,wcgs$weight[x])
   }
 }
-data.frame("typchd"= c("no CHD","MI or SD","silent MI","angina"), "mean_weight"=c(mean(a),mean(b),mean(c),mean(d)))
+
+data.frame("typchd"= c("no CHD","MI or SD","silent MI","angina"), "mean_weight"=map_dbl(list(a,b,c,d),mean))
 
 wcgs %>%
   group_by(typchd69) %>%
